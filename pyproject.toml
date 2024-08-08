@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "hexlet-code"
+version = "0.1.0"
+description = "page-analyzer"
+authors = ["Sayat Aubakirov <sayat_aubakirov@mail.ru>"]
+readme = "README.md"
+packages = [
+  { include = "page_analyzer" },
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "^3.0.3"
+gunicorn = "^22.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
