@@ -1,2 +1,4 @@
 dist/
 pycache/
+page_analyzer/__pycache__/
+page_analyzer/templates/__pycache__/
