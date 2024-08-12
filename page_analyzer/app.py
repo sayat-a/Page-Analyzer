@@ -8,4 +8,4 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 @app.route('/')
 def index():
-    render_template('/index.html')
+    return render_template('/index.html')
