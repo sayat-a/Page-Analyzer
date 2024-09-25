@@ -4,12 +4,15 @@ from flask import (
     render_template,
     request,
     redirect,
+    url_for,
     flash,
     get_flashed_messages
     )
 import psycopg2
 import validators
 import datetime
+import requests
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
 
@@ -22,7 +25,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 
-def create_table_urls():
+def create_db_tables():
     with conn.cursor() as cur:
         with open('../database.sql') as file:
             sql = file.read()
@@ -30,39 +33,94 @@ def create_table_urls():
                 cur.execute(sql)
                 conn.commit()
             except Exception as e:
-                conn.rollback()  # Откат транзакции при ошибке
+                conn.rollback()
                 print(f"Ошибка при создании таблицы: {e}")
 
-# Инициализируем базу данных при запуске приложения
-create_table_urls()
+
+create_db_tables()
 
 @app.route('/')
 def index():
-    return render_template('/index.html')
+    url = request.args.get('url', '')
+    return render_template('index.html', url=url)
 
 
 @app.route('/urls', methods=['GET', 'POST'])
 def show_urls():
     if request.method == 'POST':
         url = request.form['url']
+        
+        # Проверка валидности URL
         if not validators.url(url) or len(url) > 255:
-            return "Invalid URL", 400
+            flash("Некорректный URL", 'danger')  # Сообщение об ошибке
+            return redirect(url_for('index', url=url))  # Возврат на главную страницу
+
         try:
             with conn.cursor() as cur:
-                cur.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s)", (url, datetime.datetime.now()))
+                # Проверяем, существует ли уже URL
+                cur.execute("SELECT id FROM urls WHERE name = %s", (url,))
+                existing_url = cur.fetchone()
+                
+                if existing_url:
+                    flash("Страница уже существует", 'warning')  # Сообщение о существующем URL
+                    return redirect(url_for('show_url', id=existing_url[0]))  # Переадресация на существующий URL
+                
+                # Если URL не существует, добавляем его
+                cur.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s) RETURNING id", (url, datetime.datetime.now()))
+                url_id = cur.fetchone()[0]
                 conn.commit()
-            # После добавления URL перенаправляем на маршрут /urls
-            return redirect('/urls')
+
+                flash("Страница успешно добавлена", 'success')  # Сообщение об успехе
+                return redirect(url_for('show_url', id=url_id))
         except Exception as e:
-            conn.rollback()  # Откат транзакции при ошибке
+            conn.rollback()
             return f"Ошибка базы данных: {e}", 500
     
-    # Обработка GET-запроса для отображения списка URL
+    # Логика для GET-запроса
     try:
         with conn.cursor() as cur:
             cur.execute("SELECT id, name FROM urls ORDER BY id DESC")
             urls = cur.fetchall()
             return render_template('urls.html', urls=urls)
     except Exception as e:
-        conn.rollback()  # Откат транзакции при ошибке
+        conn.rollback()
         return f"Ошибка базы данных: {e}", 500
+
+
+@app.route('/urls/<int:id>', methods=['GET'])
+def show_url(id):
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
+            url = cur.fetchone()
+            cur.execute("SELECT * FROM url_checks WHERE url_id = %s ORDER BY created_at DESC", (id,))
+            checks = cur.fetchall()
+        return render_template('url.html', url=url, checks=checks)
+    except Exception as e:
+        return f"Ошибка базы данных: {e}", 500
+
+
+@app.route('/urls/<int:id>/checks', methods=['POST'])
+def check_url(id):
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT name FROM urls WHERE id = %s", (id,))
+            url = cur.fetchone()[0]
+        response = requests.get(url)
+        status_code = response.status_code
+        soup = BeautifulSoup(response.text, 'html.parser')
+        h1 = soup.h1.string if soup.h1 else ''
+        title = soup.title.string if soup.title else ''
+        description = soup.find('meta', attrs={'name': 'description'})
+        description = description['content'] if description else ''
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (id, status_code, h1, title, description, datetime.datetime.now()))
+            conn.commit()
+        flash("Проверка успешно завершена", 'success')
+        return redirect(f'/urls/{id}')
+    except Exception as e:
+        conn.rollback()
+        return f"Ошибка при проверке сайта: {e}", 500
