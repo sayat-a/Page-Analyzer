@@ -79,7 +79,16 @@ def show_urls():
     # Логика для GET-запроса
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT id, name FROM urls ORDER BY id DESC")
+            cur.execute("""
+                SELECT urls.id, urls.name, last_check.created_at AS last_check, last_check.status_code
+                FROM urls
+                LEFT JOIN (
+                    SELECT DISTINCT ON (url_id) url_id, created_at, status_code
+                    FROM url_checks
+                    ORDER BY url_id, created_at DESC
+                ) AS last_check ON urls.id = last_check.url_id
+                ORDER BY urls.id DESC
+            """)
             urls = cur.fetchall()
             return render_template('urls.html', urls=urls)
     except Exception as e:
