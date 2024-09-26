@@ -41,7 +41,7 @@ def show_urls():
         if existing_url:
             flash("Страница уже существует", 'warning')
             return redirect(url_for('show_url', id=existing_url[0]))
-        url_id = db.add_url(url)
+        url_id = db.insert_url(url)
         flash("Страница успешно добавлена", 'success')
         return redirect(url_for('show_url', id=url_id))
     urls = db.get_all_urls()
