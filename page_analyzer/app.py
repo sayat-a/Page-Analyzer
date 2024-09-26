@@ -70,7 +70,7 @@ def check_url(id):
         description = soup.find('meta', attrs={'name': 'description'})
         description = description['content'] if description else ''
         db.insert_url_check(id, status_code, h1, title, description)
-        flash("Проверка успешно завершена", 'success')
+        flash("Страница успешно проверена", 'success')
     except requests.RequestException:
         flash("Произошла ошибка при проверке", 'danger')
     return redirect(f'/urls/{id}')
