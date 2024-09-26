@@ -11,6 +11,7 @@ import validators
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 from . import db
 
 
@@ -37,11 +38,13 @@ def show_urls():
         if not validators.url(url) or len(url) > 255:
             flash("Некорректный URL", 'danger')
             return redirect(url_for('index', url=url))
-        existing_url = db.url_exists(url)
+        parsed_url = urlparse(url)
+        normalized_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        existing_url = db.url_exists(normalized_url)
         if existing_url:
             flash("Страница уже существует", 'warning')
             return redirect(url_for('show_url', id=existing_url[0]))
-        url_id = db.insert_url(url)
+        url_id = db.insert_url(normalized_url)
         flash("Страница успешно добавлена", 'success')
         return redirect(url_for('show_url', id=url_id))
     urls = db.get_all_urls()
