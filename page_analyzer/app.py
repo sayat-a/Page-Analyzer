@@ -65,6 +65,6 @@ def check_url(id):
     title = soup.title.string if soup.title else ''
     description = soup.find('meta', attrs={'name': 'description'})
     description = description['content'] if description else ''
-    db.add_url_check(id, status_code, h1, title, description)
+    db.insert_url_check(id, status_code, h1, title, description)
     flash("Проверка успешно завершена", 'success')
     return redirect(f'/urls/{id}')
