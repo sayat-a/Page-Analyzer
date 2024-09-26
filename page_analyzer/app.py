@@ -74,4 +74,4 @@ def check_url(id):
         return redirect(f'/urls/{id}')
     except requests.RequestException:
         flash("Произошла ошибка при проверке", 'danger')
-        return redirect(f'/urls/{id}')
+        return redirect(url_for('show_url', id=id))
