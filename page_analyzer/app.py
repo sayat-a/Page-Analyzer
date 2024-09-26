@@ -58,13 +58,16 @@ def show_url(id):
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id):
     url = db.get_url_by_id(id)['name']
-    response = requests.get(url)
-    status_code = response.status_code
-    soup = BeautifulSoup(response.text, 'html.parser')
-    h1 = soup.h1.string if soup.h1 else ''
-    title = soup.title.string if soup.title else ''
-    description = soup.find('meta', attrs={'name': 'description'})
-    description = description['content'] if description else ''
-    db.insert_url_check(id, status_code, h1, title, description)
-    flash("Проверка успешно завершена", 'success')
+    try:
+        response = requests.get(url)
+        status_code = response.status_code
+        soup = BeautifulSoup(response.text, 'html.parser')
+        h1 = soup.h1.string if soup.h1 else ''
+        title = soup.title.string if soup.title else ''
+        description = soup.find('meta', attrs={'name': 'description'})
+        description = description['content'] if description else ''
+        db.insert_url_check(id, status_code, h1, title, description)
+        flash("Проверка успешно завершена", 'success')
+    except requests.RequestException:
+        flash("Произошла ошибка при проверке", 'danger')
     return redirect(f'/urls/{id}')
