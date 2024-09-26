@@ -37,7 +37,7 @@ def show_urls():
         url = request.form['url']
         if not validators.url(url) or len(url) > 255:
             flash("Некорректный URL", 'danger')
-            return redirect(url_for('index', url=url))
+            return render_template('index.html', url=url), 422
         parsed_url = urlparse(url)
         normalized_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
         existing_url = db.url_exists(normalized_url)
