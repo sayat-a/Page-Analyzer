@@ -71,6 +71,7 @@ def check_url(id):
         description = description['content'] if description else ''
         db.insert_url_check(id, status_code, h1, title, description)
         flash("Страница успешно проверена", 'success')
+        return redirect(f'/urls/{id}')
     except requests.RequestException:
         flash("Произошла ошибка при проверке", 'danger')
-    return redirect(f'/urls/{id}')
+        return redirect(f'/urls/{id}')
