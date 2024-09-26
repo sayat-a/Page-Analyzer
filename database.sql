@@ -1,7 +1,3 @@
-drop table if exists urls;
-drop table if exists url_checks;
-
-
 create table urls (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     name VARCHAR(255) UNIQUE NOT NULL,
