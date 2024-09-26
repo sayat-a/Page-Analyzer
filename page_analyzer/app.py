@@ -27,7 +27,9 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 def create_db_tables():
     with conn.cursor() as cur:
-        with open('../database.sql') as file:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        sql_file_path = os.path.join(base_dir, '../database.sql')
+        with open(sql_file_path) as file:
             sql = file.read()
             try:
                 cur.execute(sql)
