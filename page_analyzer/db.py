@@ -3,15 +3,20 @@ import datetime
 import os
 from psycopg2.extras import DictCursor
 from dotenv import load_dotenv
+from contextlib import contextmanager
 
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
+@contextmanager
 def get_db_connection():
     conn = psycopg2.connect(DATABASE_URL)
-    return conn
+    try:
+        yield conn
+    finally:
+        conn.close()
 
 
 def create_db_tables():
@@ -43,7 +48,8 @@ def get_all_urls():
                     ) AS last_check ON urls.id = last_check.url_id
                 ORDER BY urls.id DESC
                 """)
-        return cur.fetchall()
+            urls = cur.fetchall()
+        return urls
 
 
 def insert_url(url):
@@ -60,9 +66,10 @@ def insert_url(url):
 
 def get_url_by_id(url_id):
     with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
-            return cur.fetchone()
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute("SELECT * FROM urls WHERE id = %s", (url_id,))
+            url = cur.fetchone()
+    return url
 
 
 def get_url_checks(url_id):
@@ -70,7 +77,8 @@ def get_url_checks(url_id):
         with conn.cursor(cursor_factory=DictCursor) as cur:
             cur.execute("""SELECT * FROM url_checks WHERE url_id = %s
                         ORDER BY created_at DESC""", (url_id,))
-            return cur.fetchall()
+            checks = cur.fetchall()
+        return checks
 
 
 def insert_url_check(url_id, status_code, h1, title, description):
@@ -95,4 +103,5 @@ def url_exists(url):
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT id FROM urls WHERE name = %s", (url,))
-            return cur.fetchone()
+            existing_url = cur.fetchone()
+        return existing_url
