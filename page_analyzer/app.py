@@ -73,5 +73,5 @@ def check_url(id):
         flash("Страница успешно проверена", 'success')
         return redirect(f'/urls/{id}')
     except requests.exceptions.RequestException:
-        flash("Произошла ошибка при проверке", 'danger')
-        return redirect(url_for('show_url', id=id))
+        flash("Произошла ошибка при проверке", "danger")
+        return redirect(url_for("show_url", id=id))
