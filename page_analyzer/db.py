@@ -95,7 +95,8 @@ def insert_url_check(url_id, status_code, h1, title, description):
                 title,
                 description,
                 datetime.datetime.now()
-                ))
+                )
+            )
             conn.commit()
 
 
