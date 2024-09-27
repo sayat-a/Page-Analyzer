@@ -86,15 +86,15 @@ def insert_url_check(url_id, status_code, h1, title, description):
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO url_checks (url_id, status_code, h1,
-                title, description, created_at)
+                                        title, description, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """, (
-                url_id,
-                status_code,
-                h1,
-                title,
-                description,
-                datetime.datetime.now()
+                    url_id,
+                    status_code,
+                    h1,
+                    title,
+                    description,
+                    datetime.datetime.now()
                 )
             )
             conn.commit()
