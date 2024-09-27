@@ -6,7 +6,7 @@ from flask import (
     redirect,
     url_for,
     flash,
-    )
+)
 import validators
 import requests
 from bs4 import BeautifulSoup
