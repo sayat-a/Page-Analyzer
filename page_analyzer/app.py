@@ -63,6 +63,7 @@ def check_url(id):
     url = db.get_url_by_id(id)['name']
     try:
         response = requests.get(url)
+        response.raise_for_status()
     except requests.exceptions.RequestException:
         flash("Произошла ошибка при проверке", "danger")
         return redirect(url_for("show_url", id=id))
