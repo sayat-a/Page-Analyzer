@@ -67,7 +67,7 @@ def check_url(id):
             result['h1'],
             result['title'],
             result['description']
-            )
+        )
         flash("Страница успешно проверена", 'success')
         return redirect(f'/urls/{id}')
     except requests.exceptions.RequestException:
