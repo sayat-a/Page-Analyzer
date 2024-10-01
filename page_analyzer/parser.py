@@ -11,10 +11,10 @@ def parse_url(url):
     title = soup.title.string if soup.title else ''
     description = soup.find('meta', attrs={'name': 'description'})
     description = description['content'] if description else ''
-    result = {
+    response = {
         'status_code': status_code,
         'h1': h1,
         'title': title,
         'description': description
     }
-    return result
+    return response
