@@ -16,5 +16,5 @@ def parse_url(url):
         'h1': h1,
         'title': title,
         'description': description
-              }
+    }
     return result
