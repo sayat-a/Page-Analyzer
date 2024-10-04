@@ -36,8 +36,8 @@ def index():
 @app.route('/urls', methods=['GET', 'POST'])
 def show_urls():
     if request.method == 'POST':
-        post_show_urls()
-    get_show_urls()
+        return post_show_urls()
+    return get_show_urls()
 
 
 def get_show_urls():
