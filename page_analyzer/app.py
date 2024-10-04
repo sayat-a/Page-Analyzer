@@ -25,7 +25,6 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 conn = psycopg2.connect(DATABASE_URL)
 repo = UrlRepository(conn)
-repo.create_db_tables()
 
 
 @app.route('/')
