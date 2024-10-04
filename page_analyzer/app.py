@@ -36,20 +36,28 @@ def index():
 @app.route('/urls', methods=['GET', 'POST'])
 def show_urls():
     if request.method == 'POST':
-        url = request.form['url']
-        if not validate_url(url) or len(url) > 255:
-            flash("Некорректный URL", 'danger')
-            return render_template('index.html', url=url), 422
-        normalized_url = normalize_url(url)
-        existing_url = repo.url_exists(normalized_url)
-        if existing_url:
-            flash("Страница уже существует", 'warning')
-            return redirect(url_for('show_url', id=existing_url[0]))
-        url_id = repo.insert_url(normalized_url)
-        flash("Страница успешно добавлена", 'success')
-        return redirect(url_for('show_url', id=url_id))
+        post_show_urls()
+    get_show_urls()
+
+
+def get_show_urls():
     urls = repo.get_all_urls()
     return render_template('urls.html', urls=urls)
+
+
+def post_show_urls():
+    url = request.form['url']
+    if not validate_url(url) or len(url) > 255:
+        flash("Некорректный URL", 'danger')
+        return render_template('index.html', url=url), 422
+    normalized_url = normalize_url(url)
+    existing_url = repo.url_exists(normalized_url)
+    if existing_url:
+        flash("Страница уже существует", 'warning')
+        return redirect(url_for('show_url', id=existing_url[0]))
+    url_id = repo.insert_url(normalized_url)
+    flash("Страница успешно добавлена", 'success')
+    return redirect(url_for('show_url', id=url_id))
 
 
 @app.route('/urls/<int:id>', methods=['GET'])
