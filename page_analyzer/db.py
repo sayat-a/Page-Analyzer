@@ -61,14 +61,19 @@ class UrlRepository:
             checks = repo.cur.fetchall()
         return checks
 
-    def insert_url_check(self, url_id, status_code, h1, title, description):
+    def insert_url_check(self, check_params):
         with self as repo:
             repo.cur.execute("""
                 INSERT INTO url_checks (url_id, status_code, h1,
                                         title, description, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
-                """, (url_id, status_code, h1, title,
-                      description, datetime.datetime.now()))
+                """, (
+                check_params['url_id'],
+                check_params['status_code'],
+                check_params['h1'],
+                check_params['title'],
+                check_params['description'],
+                datetime.datetime.now()))
 
     def url_exists(self, url):
         with self as repo:
