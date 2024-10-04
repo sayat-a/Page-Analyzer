@@ -3,6 +3,7 @@ import os
 import psycopg2
 from psycopg2.extras import DictCursor
 
+
 class UrlRepository:
     def __init__(self, conn):
         self.conn = conn
@@ -63,9 +64,11 @@ class UrlRepository:
     def insert_url_check(self, url_id, status_code, h1, title, description):
         with self as repo:
             repo.cur.execute("""
-                INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at)
+                INSERT INTO url_checks (url_id, status_code, h1,
+                                        title, description, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
-            """, (url_id, status_code, h1, title, description, datetime.datetime.now()))
+                """, (url_id, status_code, h1, title,
+                      description, datetime.datetime.now()))
 
     def url_exists(self, url):
         with self as repo:
