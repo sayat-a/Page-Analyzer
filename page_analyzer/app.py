@@ -72,13 +72,14 @@ def check_url(id):
     url = repo.get_url_by_id(id)['name']
     try:
         response = parse_url(url)
-        repo.insert_url_check(
-            id,
-            response['status_code'],
-            response['h1'],
-            response['title'],
-            response['description']
-        )
+        check_params = {
+            'url_id': id,
+            'status_code': response['status_code'],
+            'h1': response['h1'],
+            'title': response['title'],
+            'description': response['description'],
+        }
+        repo.insert_url_check(check_params)
         flash("Страница успешно проверена", 'success')
         return redirect(f'/urls/{id}')
     except requests.exceptions.RequestException:
