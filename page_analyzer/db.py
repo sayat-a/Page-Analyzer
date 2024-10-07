@@ -5,8 +5,8 @@ from psycopg2.extras import DictCursor
 
 
 class UrlRepository:
-    def __init__(self, conn):
-        self.conn = conn
+    def __init__(self, database_url):
+        self.conn = psycopg2.connect(database_url)
 
     def __enter__(self):
         self.conn = psycopg2.connect(os.getenv('DATABASE_URL'))
