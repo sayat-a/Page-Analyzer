@@ -47,7 +47,7 @@ def get_show_urls():
 
 def post_show_urls():
     url = request.form['url']
-    if not validate_url(url) or len(url) > 255:
+    if not validate_url(url):
         flash("Некорректный URL", 'danger')
         return render_template('index.html', url=url), 422
     normalized_url = normalize_url(url)
